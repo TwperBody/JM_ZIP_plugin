@@ -23,6 +23,31 @@
 
 </div>
 
+### 偏好配置🔧
+
+修改`config.yml`中的`base_dir`为你自己实际的下载目录
+
+```yaml
+# Github Actions 下载脚本配置
+version: '2.0'
+
+dir_rule:
+  base_dir: C:\Users\Hello\Desktop\langbot\plugins\JMcomic\downloads
+  rule: Bd_Atitle_Pindex
+
+download:
+  cache: true
+  image:
+    decode: true
+    suffix: .jpg
+  threading:
+    # batch_count: 章节的批量下载图片线程数
+    # 数值大，下得快，配置要求高，对禁漫压力大
+    # 数值小，下得慢，配置要求低，对禁漫压力小
+    # PS: 禁漫网页一般是一次请求50张图
+    batch_count: 45
+```
+
 ### 指令🤖
 
 |指令|参数|备注|
