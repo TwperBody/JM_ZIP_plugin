@@ -1,8 +1,8 @@
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *  # 导入事件类
 from pkg.platform.types import *
-from plugins.JMcomic.image2pdf import *
-from plugins.JMcomic.sendfile import *
+from plugins.JM_PDF_plugin.image2pdf import *
+from plugins.JM_PDF_plugin.sendfile import *
 import re
 import os
 

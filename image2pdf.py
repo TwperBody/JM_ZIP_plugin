@@ -6,6 +6,7 @@
 import jmcomic, os, time, yaml
 from PIL import Image
 from jmcomic import *
+import os
 
 def all2PDF(input_folder, pdfpath, pdfname):
     start_time = time.time()
@@ -51,7 +52,7 @@ def all2PDF(input_folder, pdfpath, pdfname):
 
 def sendPDF(mangas):
     # 自定义设置：
-    config = "C:\\Users\\Hello\\Desktop\\langbot\\plugins\\JMcomic\\config.yml"
+    config = os.path.join(os.path.dirname(__file__), "config.yml")
     loadConfig = jmcomic.JmOption.from_file(config)
     # 下载漫画
     for id in mangas:
