@@ -1,6 +1,6 @@
 # JMcomic PDF Plugin
 
-基于**langbot**与[image2pdf](https://github.com/salikx/image2pdf)的JM PDF转换器插件🧩
+基于**langbot**与[image2pdf](https://github.com/salikx/image2pdf)的JM PDF插件🧩
 
 ## 使用方法❗
 
