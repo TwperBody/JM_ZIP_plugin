@@ -80,3 +80,14 @@ def searchManga(id):
     page = client.search_site(search_query=id)
     album: JmAlbumDetail = page.single_album
     return album.title
+
+
+def mangaCache(id):
+    '''
+    检查是否缓存漫画
+    '''
+    title = searchManga(id)
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "downloads", title + ".pdf")):
+        print("《%s》 已存在，使用缓存pdf" % title)
+        return True
+    return False

@@ -53,7 +53,8 @@ class JMcomicPDFPlugin(BasePlugin):
             case "/jm [ID]":
                 manga_id = re.search(r"^/jm (\d+)$", msg).group(1)
                 await ctx.reply(f"正在将jm{manga_id}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
-                sendPDF([manga_id])
+                if not mangaCache(manga_id):
+                    sendPDF([manga_id])
                 message_data = {
                     "group_id": str(ctx.event.launcher_id),
                     "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}.pdf")),
