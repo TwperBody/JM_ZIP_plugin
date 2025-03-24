@@ -6,6 +6,15 @@ class send_file():
         self.url = f"http://{host}:{port}"
 
     async def send(self, message_data: dict):
+        '''
+        发送文件
+        
+        args:
+            message_data: dict, 包含文件信息的字典
+            
+        return:
+            None
+        '''
         headers = {
             'Content-Type': 'application/json'
         }

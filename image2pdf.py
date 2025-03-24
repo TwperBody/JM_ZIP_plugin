@@ -9,20 +9,29 @@ from jmcomic import *
 import os
 
 def all2PDF(input_folder, pdfpath, pdfname):
+    '''
+    将目录下图片转换为pdf文件
+    
+    args:
+        input_folder: 输入目录
+        pdfpath: pdf目录
+        pdfname: pdf文件名
+    
+    return: 
+        None
+    '''
     start_time = time.time()
     paht = input_folder
-    zimulu = []  # 子目录（里面为image）
-    image = []  # 子目录图集
+    subdir = []
+    image = []
     sources = []  # pdf格式的图
 
     with os.scandir(paht) as entries:
         for entry in entries:
             if entry.is_dir():
-                zimulu.append(int(entry.name))
-    # 对数字进行排序
-    zimulu.sort()
-
-    for i in zimulu:
+                subdir.append(int(entry.name))
+    subdir.sort()
+    for i in subdir:
         with os.scandir(paht + "/" + str(i)) as entries:
             for entry in entries:
                 if entry.is_dir():
@@ -51,17 +60,22 @@ def all2PDF(input_folder, pdfpath, pdfname):
 
 
 def sendPDF(mangas):
-    # 自定义设置：
+    '''
+    发送pdf文件
+    
+    args:
+        mangas: 漫画id列表
+        
+    return: 
+        None
+    '''
     config = os.path.join(os.path.dirname(__file__), "config.yml")
     loadConfig = jmcomic.JmOption.from_file(config)
-    # 下载漫画
     for id in mangas:
         jmcomic.download_album(id,loadConfig)
-
     with open(config, "r", encoding="utf8") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         path = data["dir_rule"]["base_dir"]
-
     with os.scandir(path) as entries:
         for entry in entries:
             if entry.is_dir():
@@ -74,7 +88,13 @@ def sendPDF(mangas):
                     
 def searchManga(id):
     '''
-    return: 漫画标题
+    搜索漫画标题
+    
+    args:
+        id: 漫画id
+        
+    return: 
+        漫画标题
     '''
     client = JmOption.default().new_jm_client()
     page = client.search_site(search_query=id)
@@ -85,6 +105,13 @@ def searchManga(id):
 def mangaCache(id):
     '''
     检查是否缓存漫画
+    
+    args:
+        id: 漫画id
+        
+    return: 
+        True: 已缓存
+        False: 未缓存
     '''
     title = searchManga(id)
     if os.path.exists(os.path.join(os.path.dirname(__file__), "downloads", title + ".pdf")):
