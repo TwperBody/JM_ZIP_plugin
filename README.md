@@ -62,3 +62,9 @@ download:
 <img src="./images/readme.png" width="65%">
 
 </div>
+
+### 常见问题❓
+
+- 本子下载到本地后无法发出？
+    - 检查napcat控制台报错信息，大概率是napcat为非最新版本，更新napcat后重试
+- 其他问题欢迎issue或在交流群讨论
