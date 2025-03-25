@@ -64,7 +64,7 @@ class JMcomicPDFPlugin(BasePlugin):
                         await ctx.reply(MessageChain([
                             Plain(f"检测到jm{manga_id}存在多个章节，现在默认转换第一话\n请输入“/jm [jmID] [章节数]”指定章节")
                         ]))
-                    chap = "-1"
+                        chap = "-1"
                 match ctx.event.query.launcher_type:
                     case LauncherTypes.GROUP:
                         message_data = {
