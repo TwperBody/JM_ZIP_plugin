@@ -57,9 +57,25 @@ download:
 
 ### 演示✨
 
+#### 单章节漫画
+
 <div align="center">
 
 <img src="./images/readme.png" width="65%">
+
+</div>
+
+#### 多章节漫画
+
+<div align="center">
+
+<img src="./images/readme_multichap1.png" width="65%">
+
+</div>
+
+<div align="center">
+
+<img src="./images/readme_multichap2.png" width="65%">
 
 </div>
 
