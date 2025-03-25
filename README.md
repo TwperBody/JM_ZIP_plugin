@@ -54,6 +54,7 @@ download:
 |-|-|-|
 |`/jm`|||
 |`/jm [jmID]`|`jmID`|`jmID`为漫画ID|
+|`/jm [jmID] [chapter]`|`jmID` `chapter`|`chapter`为指定章节|
 
 ### 演示✨
 
