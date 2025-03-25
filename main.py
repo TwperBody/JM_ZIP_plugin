@@ -1,8 +1,9 @@
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *  # 导入事件类
 from pkg.platform.types import *
-from plugins.JM_PDF_plugin.image2pdf import *
-from plugins.JM_PDF_plugin.sendfile import *
+from pkg.core.entities import LauncherTypes
+from plugins.JM_PDF_plugin.utils.image2pdf import *
+from plugins.JM_PDF_plugin.utils.sendfile import *
 import re
 import os
 
@@ -39,7 +40,8 @@ class JMcomicPDFPlugin(BasePlugin):
     async def initialize(self):
         pass
 
-    # 当收到群消息时触发
+    # 当收到群/私聊消息时触发
+    @handler(PersonMessageReceived)
     @handler(GroupMessageReceived)
     async def group_message_received(self, ctx: EventContext):
         msg = str(ctx.event.message_chain).strip()
@@ -57,12 +59,20 @@ class JMcomicPDFPlugin(BasePlugin):
                 ]))
                 if not mangaCache(manga_id):
                     sendPDF([manga_id])
-                message_data = {
-                    "group_id": str(ctx.event.launcher_id),
-                    "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}.pdf")),
-                    "name": f"{manga_id}.pdf",
-                }
-                await self.send_file.send(message_data)
+                match ctx.event.query.launcher_type:
+                    case LauncherTypes.GROUP:
+                        message_data = {
+                            "group_id": str(ctx.event.launcher_id),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}.pdf")),
+                            "name": f"{manga_id}.pdf",
+                        }
+                    case LauncherTypes.PERSON:
+                        message_data = {
+                            "user_id": str(ctx.event.sender_id),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}.pdf")),
+                            "name": f"{manga_id}.pdf",
+                        }
+                await self.send_file.send(message_data, ctx.event.query.launcher_type)
             case _:
                 pass
         

@@ -69,7 +69,7 @@ def sendPDF(mangas):
     return: 
         None
     '''
-    config = os.path.join(os.path.dirname(__file__), "config.yml")
+    config = os.path.join(os.path.dirname(__file__), "../config.yml")
     loadConfig = jmcomic.JmOption.from_file(config)
     for id in mangas:
         jmcomic.download_album(id,loadConfig)
