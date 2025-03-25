@@ -61,6 +61,22 @@ def all2PDF(input_folder, pdfpath, pdfname, chap=1):
     print("运行时间：%3.2f 秒" % run_time)
 
 
+def downloadManga(manga):
+    '''
+    下载漫画
+    
+    args:
+        manga: 漫画id
+        
+    return: 
+        None
+    '''
+    config = os.path.join(os.path.dirname(__file__), "../config.yml")
+    loadConfig = jmcomic.JmOption.from_file(config)
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "../downloads", str(manga))):    # 若已经下载直接跳过
+        return
+    jmcomic.download_album(manga, loadConfig)
+
 def convertPDF(mangas):
     '''
     转换pdf文件
@@ -73,11 +89,6 @@ def convertPDF(mangas):
         None: 未分多p
     '''
     config = os.path.join(os.path.dirname(__file__), "../config.yml")
-    loadConfig = jmcomic.JmOption.from_file(config)
-    for id in mangas:
-        if os.path.exists(os.path.join(os.path.dirname(__file__), "../downloads", str(id))):    # 若已经下载直接跳过
-            continue
-        jmcomic.download_album(id, loadConfig)
     with open(config, "r", encoding="utf8") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         path = data["dir_rule"]["base_dir"]
@@ -88,7 +99,7 @@ def convertPDF(mangas):
                 continue
             if os.path.exists(os.path.join(os.path.join(path, entry.name+".pdf"))):
                 print("文件：《%s》 已存在，跳过" % entry.name)
-                continue
+                break
             else:
                 print("开始转换：%s " % entry.name)
                 if len(os.listdir(os.path.join(path, entry.name))) > 1:
@@ -127,7 +138,7 @@ def mangaCache(id):
         False: 未缓存
     '''
     title = searchManga(id)
-    if os.path.exists(os.path.join(os.path.dirname(__file__), "downloads", title + ".pdf")):
-        print("《%s》 已存在，使用缓存pdf" % title)
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "downloads", title)):
+        print("《%s》 已存在，使用缓存漫画图片进行转化" % title)
         return True
     return False
