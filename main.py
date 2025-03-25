@@ -60,11 +60,12 @@ class JMcomicPDFPlugin(BasePlugin):
                 ]))
                 chap = ""
                 if not mangaCache(manga_id):
-                    if convertPDF([manga_id]) == 1:
-                        await ctx.reply(MessageChain([
-                            Plain(f"检测到jm{manga_id}存在多个章节，现在默认转换第一话\n请输入“/jm [jmID] [章节数]”指定章节")
-                        ]))
-                        chap = "-1"
+                    downloadManga(manga_id)
+                if convertPDF([manga_id]) == 1:
+                    await ctx.reply(MessageChain([
+                        Plain(f"检测到jm{manga_id}存在多个章节，现在默认转换第一话\n请输入“/jm [jmID] [章节数]”指定章节")
+                    ]))
+                    chap = "-1"
                 match ctx.event.query.launcher_type:
                     case LauncherTypes.GROUP:
                         message_data = {
@@ -85,6 +86,8 @@ class JMcomicPDFPlugin(BasePlugin):
                 await ctx.reply(MessageChain([
                     Plain(f"正在将jm{manga_id}章节{chap}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
                 ]))
+                if not mangaCache(manga_id):
+                    downloadManga(manga_id)
                 manga_title = searchManga(manga_id)
                 all2PDF(os.path.join(self.pdf_dir, manga_title), self.pdf_dir, f"{manga_title}-{chap}", chap)
                 self.ap.logger.info("转换完成")
