@@ -18,7 +18,8 @@ class JMcomicPDFPlugin(BasePlugin):
         self.pdf_dir = os.path.join(current_dir, "downloads")
         self.instructions = {
             "/jm": r"^/jm$",
-            "/jm [ID]": r"^/jm (\d+)$"
+            "/jm [ID]": r"^/jm (\d+)$",
+            "/jm [ID] [CHAPTER]": r"^/jm (\d+) (\d+)$"
         }
     
     def matchPattern(self, msg):
@@ -57,20 +58,48 @@ class JMcomicPDFPlugin(BasePlugin):
                 await ctx.reply(MessageChain([
                     Plain(f"正在将jm{manga_id}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
                 ]))
+                chap = ""
                 if not mangaCache(manga_id):
-                    sendPDF([manga_id])
+                    if convertPDF([manga_id]) == 1:
+                        await ctx.reply(MessageChain([
+                            Plain(f"检测到jm{manga_id}存在多个章节，现在默认转换第一话\n请输入“/jm [jmID] [章节数]”指定章节")
+                        ]))
+                    chap = "-1"
                 match ctx.event.query.launcher_type:
                     case LauncherTypes.GROUP:
                         message_data = {
                             "group_id": str(ctx.event.launcher_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}.pdf")),
-                            "name": f"{manga_id}.pdf",
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}{chap}.pdf")),
+                            "name": f"{manga_id}{chap}.pdf",
                         }
                     case LauncherTypes.PERSON:
                         message_data = {
                             "user_id": str(ctx.event.sender_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}.pdf")),
-                            "name": f"{manga_id}.pdf",
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}{chap}.pdf")),
+                            "name": f"{manga_id}{chap}.pdf",
+                        }
+                await self.send_file.send(message_data, ctx.event.query.launcher_type)
+            case "/jm [ID] [CHAPTER]":
+                manga_id = re.search(r"^/jm (\d+) (\d+)$", msg).group(1)
+                chap = int(re.search(r"^/jm (\d+) (\d+)$", msg).group(2))
+                await ctx.reply(MessageChain([
+                    Plain(f"正在将jm{manga_id}章节{chap}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
+                ]))
+                manga_title = searchManga(manga_id)
+                all2PDF(os.path.join(self.pdf_dir, manga_title), self.pdf_dir, f"{manga_title}-{chap}", chap)
+                self.ap.logger.info("转换完成")
+                match ctx.event.query.launcher_type:
+                    case LauncherTypes.GROUP:
+                        message_data = {
+                            "group_id": str(ctx.event.launcher_id),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_title}-{chap}.pdf")),
+                            "name": f"{manga_id}-{chap}.pdf",
+                        }
+                    case LauncherTypes.PERSON:
+                        message_data = {
+                            "user_id": str(ctx.event.sender_id),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_title}-{chap}.pdf")),
+                            "name": f"{manga_id}-{chap}.pdf",
                         }
                 await self.send_file.send(message_data, ctx.event.query.launcher_type)
             case _:

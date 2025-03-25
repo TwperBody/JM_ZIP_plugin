@@ -8,7 +8,7 @@ from PIL import Image
 from jmcomic import *
 import os
 
-def all2PDF(input_folder, pdfpath, pdfname):
+def all2PDF(input_folder, pdfpath, pdfname, chap=1):
     '''
     将目录下图片转换为pdf文件
     
@@ -16,28 +16,30 @@ def all2PDF(input_folder, pdfpath, pdfname):
         input_folder: 输入目录
         pdfpath: pdf目录
         pdfname: pdf文件名
+        chap: 章节数
     
     return: 
         None
     '''
     start_time = time.time()
-    paht = input_folder
+    path = input_folder
     subdir = []
     image = []
     sources = []  # pdf格式的图
 
-    with os.scandir(paht) as entries:
+    with os.scandir(path) as entries:
         for entry in entries:
             if entry.is_dir():
                 subdir.append(int(entry.name))
     subdir.sort()
+    subdir = [entry for entry in subdir if entry == int(chap)]
     for i in subdir:
-        with os.scandir(paht + "/" + str(i)) as entries:
+        with os.scandir(path + "/" + str(i)) as entries:
             for entry in entries:
                 if entry.is_dir():
                     print("这一级不应该有自录")
                 if entry.is_file():
-                    image.append(paht + "/" + str(i) + "/" + entry.name)
+                    image.append(path + "/" + str(i) + "/" + entry.name)
 
     if "jpg" in image[0]:
         output = Image.open(image[0])
@@ -59,32 +61,41 @@ def all2PDF(input_folder, pdfpath, pdfname):
     print("运行时间：%3.2f 秒" % run_time)
 
 
-def sendPDF(mangas):
+def convertPDF(mangas):
     '''
-    发送pdf文件
+    转换pdf文件
     
     args:
         mangas: 漫画id列表
         
     return: 
-        None
+        1: 存在多p
+        None: 未分多p
     '''
     config = os.path.join(os.path.dirname(__file__), "../config.yml")
     loadConfig = jmcomic.JmOption.from_file(config)
     for id in mangas:
-        jmcomic.download_album(id,loadConfig)
+        if os.path.exists(os.path.join(os.path.dirname(__file__), "../downloads", str(id))):    # 若已经下载直接跳过
+            continue
+        jmcomic.download_album(id, loadConfig)
     with open(config, "r", encoding="utf8") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         path = data["dir_rule"]["base_dir"]
+    manga_title = searchManga(mangas[0])
     with os.scandir(path) as entries:
         for entry in entries:
-            if entry.is_dir():
-                if os.path.exists(os.path.join(path +'/' +entry.name + ".pdf")):
-                    print("文件：《%s》 已存在，跳过" % entry.name)
-                    continue
-                else:
-                    print("开始转换：%s " % entry.name)
-                    all2PDF(path + "/" + entry.name, path, entry.name)
+            if not entry.name == manga_title:
+                continue
+            if os.path.exists(os.path.join(os.path.join(path, entry.name+".pdf"))):
+                print("文件：《%s》 已存在，跳过" % entry.name)
+                continue
+            else:
+                print("开始转换：%s " % entry.name)
+                if len(os.listdir(os.path.join(path, entry.name))) > 1:
+                    all2PDF(os.path.join(path, entry.name), path, f"{entry.name}-1")
+            if len(os.listdir(os.path.join(path, entry.name))) > 1:
+                return 1
+    return None
                     
 def searchManga(id):
     '''
