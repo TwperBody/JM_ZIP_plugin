@@ -86,7 +86,6 @@ download:
 |-|-|
 |插件加载失败？|请按照README中的安装步骤进行，并确保您的插件**目录名称**为`JM_PDF_plugin`|
 |本子下载到本地后无法发出？|1. 可能是因为待下载漫画为长篇，下载全部章节所需时间过长，推荐下载短篇<br>2. 确保`config.yml`内`base_dir`为插件目录内`downloads`目录的**绝对路径**|
-|加载插件失败？|检查是否安装依赖，一般是未安装`jmcomic`，使用`pip install jmcomic`安装即可|
 |与`langbot`内置AI对话冲突？|issue [#4](https://github.com/AmethystTim/JM_PDF_plugin/issues/4)|
 
 > 有其他问题欢迎提issue或在交流群讨论
