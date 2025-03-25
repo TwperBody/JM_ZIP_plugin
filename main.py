@@ -42,7 +42,7 @@ class JMcomicPDFPlugin(BasePlugin):
     # 当收到群消息时触发
     @handler(GroupMessageReceived)
     async def group_message_received(self, ctx: EventContext):
-        msg = str(ctx.event.message_chain)
+        msg = str(ctx.event.message_chain).strip()
         # 匹配指令
         match self.matchPattern(msg):
             case "/jm":
@@ -52,7 +52,7 @@ class JMcomicPDFPlugin(BasePlugin):
                 ]))
             case "/jm [ID]":
                 manga_id = re.search(r"^/jm (\d+)$", msg).group(1)
-                await ctx.reply(f"正在将jm{manga_id}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
+                await ctx.reply(MessageChain([Plain("正在将jm{manga_id}转换为PDF...\n可能需要10s至1min不等，请耐心等待")]))
                 if not mangaCache(manga_id):
                     sendPDF([manga_id])
                 message_data = {
