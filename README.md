@@ -65,9 +65,10 @@ download:
 
 ### 常见问题❓
 
-- 本子下载到本地后无法发出？
-    - 可能是因为待下载漫画为连载漫画，下载全部章节所需时间过长，推荐下载短篇
-    - 检查napcat控制台报错信息，大概率是napcat为非最新版本，更新napcat后重试
-- 加载插件失败？
-    - 检查是否安装依赖，一般是未安装`jmcomic`，使用`pip install jmcomic`安装即可
-- 其他问题欢迎issue或在交流群讨论
+|Q|A|
+|-|-|
+|本子下载到本地后无法发出？|1. 可能是因为待下载漫画为连载漫画，下载全部章节所需时间过长，推荐下载短篇<br>2. 检查napcat控制台报错信息，大概率是napcat为非最新版本，更新napcat后重试|
+|加载插件失败？|检查是否安装依赖，一般是未安装`jmcomic`，使用`pip install jmcomic`安装即可|
+|与`langbot`内置AI对话冲突？|issue [#4](https://github.com/AmethystTim/JM_PDF_plugin/issues/4)|
+
+> 有其他问题欢迎提issue或在交流群讨论
