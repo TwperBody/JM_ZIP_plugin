@@ -2,7 +2,7 @@
 version: '2.0'
 
 dir_rule:
-  base_dir: "C:\\Users\\Hello\\Desktop\\downloads" # 下载存储目录，要求为插件目录下downloads目录的绝对路径
+  base_dir: "C:\\Users\\Hello\\Desktop\\downloads" # 漫画/PDF的存储目录
   rule: Bd_Aid_Pindex
 
 # client:
