@@ -73,16 +73,15 @@ def downloadManga(manga):
     '''
     config = os.path.join(os.path.dirname(__file__), "../config.yml")
     loadConfig = jmcomic.JmOption.from_file(config)
-    if os.path.exists(os.path.join(os.path.dirname(__file__), "../downloads", str(manga))):    # 若已经下载直接跳过
-        return
+    mangaCache(manga)
     jmcomic.download_album(manga, loadConfig)
 
-def convertPDF(mangas):
+def convertPDF(manga):
     '''
     转换pdf文件
     
     args:
-        mangas: 漫画id列表
+        manga: 漫画id
         
     return: 
         1: 存在多p
@@ -92,10 +91,9 @@ def convertPDF(mangas):
     with open(config, "r", encoding="utf8") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         path = data["dir_rule"]["base_dir"]
-    manga_title = searchManga(mangas[0])
     with os.scandir(path) as entries:
         for entry in entries:
-            if not entry.name == manga_title:
+            if not entry.name == manga:
                 continue
             if os.path.exists(os.path.join(os.path.join(path, entry.name+".pdf"))):
                 print("文件：《%s》 已存在，跳过" % entry.name)
@@ -137,8 +135,11 @@ def mangaCache(id):
         True: 已缓存
         False: 未缓存
     '''
-    title = searchManga(id)
-    if os.path.exists(os.path.join(os.path.dirname(__file__), "downloads", title)):
-        print("《%s》 已存在，使用缓存漫画图片进行转化" % title)
-        return True
-    return False
+    config = os.path.join(os.path.dirname(__file__), "../config.yml")
+    with open(config, "r", encoding="utf8") as f:
+        data = yaml.load(f, Loader=yaml.FullLoader)
+        path = data["dir_rule"]["base_dir"]
+        if os.path.exists(os.path.join(path, id)):
+            print(f"漫画{id}已存在")
+            return True
+        return False

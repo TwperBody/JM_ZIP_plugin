@@ -15,7 +15,10 @@ class JMcomicPDFPlugin(BasePlugin):
     # 插件加载时触发
     def __init__(self, host: APIHost):
         self.send_file = send_file(host="127.0.0.1", port=3000)
-        self.pdf_dir = os.path.join(current_dir, "downloads")
+        config = os.path.join(os.path.dirname(__file__), "config.yml")
+        with open(config, "r", encoding="utf8") as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+            self.pdf_dir = data["dir_rule"]["base_dir"]
         self.instructions = {
             "/jm": r"^/jm$",
             "/jm [ID]": r"^/jm (\d+)$",
@@ -61,22 +64,23 @@ class JMcomicPDFPlugin(BasePlugin):
                 chap = ""
                 if not mangaCache(manga_id):
                     downloadManga(manga_id)
-                if convertPDF([manga_id]) == 1:
+                if convertPDF(manga_id) == 1:
                     await ctx.reply(MessageChain([
                         Plain(f"检测到jm{manga_id}存在多个章节，现在默认转换第一话\n请输入“/jm [jmID] [章节数]”指定章节")
                     ]))
                     chap = "-1"
+                self.ap.logger.info(f"发送文件：{os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf"))}")
                 match ctx.event.query.launcher_type:
                     case LauncherTypes.GROUP:
                         message_data = {
                             "group_id": str(ctx.event.launcher_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}{chap}.pdf")),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf")),
                             "name": f"{manga_id}{chap}.pdf",
                         }
                     case LauncherTypes.PERSON:
                         message_data = {
                             "user_id": str(ctx.event.sender_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{searchManga(manga_id)}{chap}.pdf")),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf")),
                             "name": f"{manga_id}{chap}.pdf",
                         }
                 await self.send_file.send(message_data, ctx.event.query.launcher_type)
@@ -88,20 +92,19 @@ class JMcomicPDFPlugin(BasePlugin):
                 ]))
                 if not mangaCache(manga_id):
                     downloadManga(manga_id)
-                manga_title = searchManga(manga_id)
-                all2PDF(os.path.join(self.pdf_dir, manga_title), self.pdf_dir, f"{manga_title}-{chap}", chap)
+                all2PDF(os.path.join(self.pdf_dir, manga_id), self.pdf_dir, f"{manga_id}-{chap}", chap)
                 self.ap.logger.info("转换完成")
                 match ctx.event.query.launcher_type:
                     case LauncherTypes.GROUP:
                         message_data = {
                             "group_id": str(ctx.event.launcher_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_title}-{chap}.pdf")),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}-{chap}.pdf")),
                             "name": f"{manga_id}-{chap}.pdf",
                         }
                     case LauncherTypes.PERSON:
                         message_data = {
                             "user_id": str(ctx.event.sender_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_title}-{chap}.pdf")),
+                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}-{chap}.pdf")),
                             "name": f"{manga_id}-{chap}.pdf",
                         }
                 await self.send_file.send(message_data, ctx.event.query.launcher_type)
