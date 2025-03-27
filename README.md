@@ -84,8 +84,10 @@ download:
 
 |Q|A|
 |-|-|
-|插件加载失败？|请按照README中的安装步骤进行，并确保您的插件**目录名称**为`JM_PDF_plugin`|
-|本子下载到本地后无法发出？|1. 可能是因为待下载漫画为长篇，下载全部章节所需时间过长，推荐下载短篇<br>|
-|与`langbot`内置AI对话冲突？|issue [#4](https://github.com/AmethystTim/JM_PDF_plugin/issues/4)|
+|插件加载失败|请按照README中的安装步骤进行，并确保您的插件**目录名称**为`JM_PDF_plugin`|
+|本子下载到本地后无法发出|待下载漫画可能为长篇漫画，下载全部章节所需时间过长，推荐下载短篇<br>|
+|与`langbot`内置AI对话冲突|issue [#4](https://github.com/AmethystTim/JM_PDF_plugin/issues/4)|
+|`Docker`部署langbot导致的路径问题|issue [#9](https://github.com/AmethystTim/JM_PDF_plugin/issues/9)|
+
 
 > 有其他问题欢迎提issue或在交流群讨论

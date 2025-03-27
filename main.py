@@ -92,8 +92,15 @@ class JMcomicPDFPlugin(BasePlugin):
                 ]))
                 if not mangaCache(manga_id):
                     downloadManga(manga_id)
-                all2PDF(os.path.join(self.pdf_dir, manga_id), self.pdf_dir, f"{manga_id}-{chap}", chap)
-                self.ap.logger.info("转换完成")
+                match all2PDF(os.path.join(self.pdf_dir, manga_id), self.pdf_dir, f"{manga_id}-{chap}", chap):
+                    case 0:
+                        self.ap.logger.info(f"jm{manga_id}转换完成")
+                    case -1:
+                        self.ap.logger.error(f"jm{manga_id}转换失败-章节{chap}不存在")
+                        await ctx.reply(MessageChain([
+                            Plain(f"jm{manga_id}转换失败-章节{chap}不存在")
+                        ]))
+                        return
                 match ctx.event.query.launcher_type:
                     case LauncherTypes.GROUP:
                         message_data = {
