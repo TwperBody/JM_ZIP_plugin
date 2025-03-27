@@ -49,6 +49,13 @@ class JMcomicPDFPlugin(BasePlugin):
     @handler(GroupMessageReceived)
     async def group_message_received(self, ctx: EventContext):
         msg = str(ctx.event.message_chain).strip()
+        # 文案匹配
+        manga_id = "".join([char for char in msg if char.isdigit()])
+        if 6 <= len(manga_id) <= 7:
+            await ctx.reply(MessageChain([
+                Plain(f"检测到jm号{manga_id}")
+            ]))
+            msg = f"/jm {manga_id}"
         # 匹配指令
         match self.matchPattern(msg):
             case "/jm":

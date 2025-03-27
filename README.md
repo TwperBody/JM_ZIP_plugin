@@ -2,6 +2,12 @@
 
 基于**langbot**与[image2pdf](https://github.com/salikx/image2pdf)的JM PDF插件🧩
 
+## 插件功能🎨
+
+- [x] 下载漫画并转换为PDF
+- [x] 多章节漫画指定章节转换
+- [x] 匹配文案对应jmID
+
 ## 使用方法❗
 
 ### 插件安装🛠️
@@ -77,6 +83,14 @@ download:
 <div align="center">
 
 <img src="./images/readme_multichap2.png" width="65%">
+
+</div>
+
+#### 文案匹配
+
+<div align="center">
+
+<img src="./images/readme_match.png" width="65%">
 
 </div>
 
