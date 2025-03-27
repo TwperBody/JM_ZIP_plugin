@@ -50,12 +50,13 @@ class JMcomicPDFPlugin(BasePlugin):
     async def group_message_received(self, ctx: EventContext):
         msg = str(ctx.event.message_chain).strip()
         # 文案匹配
-        manga_id = "".join([char for char in msg if char.isdigit()])
-        if 6 <= len(manga_id) <= 7:
-            await ctx.reply(MessageChain([
-                Plain(f"检测到jm号{manga_id}")
-            ]))
-            msg = f"/jm {manga_id}"
+        if not msg.startswith("/jm"):
+            manga_id = "".join([char for char in msg if char.isdigit()])
+            if 6 <= len(manga_id) <= 7:
+                await ctx.reply(MessageChain([
+                    Plain(f"检测到jm号{manga_id}")
+                ]))
+                msg = f"/jm {manga_id}"
         # 匹配指令
         match self.matchPattern(msg):
             case "/jm":
@@ -70,7 +71,21 @@ class JMcomicPDFPlugin(BasePlugin):
                 ]))
                 chap = ""
                 if not mangaCache(manga_id):
-                    downloadManga(manga_id)
+                    match downloadManga(manga_id):
+                        case 0:
+                            pass
+                        case 1:
+                            self.ap.logger.info(f"jm{manga_id}对应漫画不存在")
+                            await ctx.reply(MessageChain([
+                                Plain(f"jm{manga_id}对应漫画不存在")
+                            ]))
+                            return
+                        case -1:
+                            self.ap.logger.info(f"未知错误")
+                            await ctx.reply(MessageChain([
+                                Plain(f"发生未知错误")
+                            ]))
+                            return
                 if convertPDF(manga_id) == 1:
                     await ctx.reply(MessageChain([
                         Plain(f"检测到jm{manga_id}存在多个章节，现在默认转换第一话\n请输入“/jm [jmID] [章节数]”指定章节")
@@ -98,12 +113,26 @@ class JMcomicPDFPlugin(BasePlugin):
                     Plain(f"正在将jm{manga_id}章节{chap}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
                 ]))
                 if not mangaCache(manga_id):
-                    downloadManga(manga_id)
+                    match downloadManga(manga_id):
+                        case 0:
+                            pass
+                        case 1:
+                            self.ap.logger.info(f"jm{manga_id}对应漫画不存在")
+                            await ctx.reply(MessageChain([
+                                Plain(f"jm{manga_id}对应漫画不存在")
+                            ]))
+                            return
+                        case -1:
+                            self.ap.logger.info(f"未知错误")
+                            await ctx.reply(MessageChain([
+                                Plain(f"发生未知错误")
+                            ]))
+                            return
                 match all2PDF(os.path.join(self.pdf_dir, manga_id), self.pdf_dir, f"{manga_id}-{chap}", chap):
                     case 0:
                         self.ap.logger.info(f"jm{manga_id}转换完成")
                     case -1:
-                        self.ap.logger.error(f"jm{manga_id}转换失败-章节{chap}不存在")
+                        self.ap.logger.info(f"jm{manga_id}转换失败-章节{chap}不存在")
                         await ctx.reply(MessageChain([
                             Plain(f"jm{manga_id}转换失败-章节{chap}不存在")
                         ]))

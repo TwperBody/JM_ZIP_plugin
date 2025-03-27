@@ -3,10 +3,9 @@
 作者：salikx
 '''
 
-import jmcomic, os, time, yaml
+import os, time, yaml
 from PIL import Image
-from jmcomic import *
-import os
+import jmcomic
 
 def all2PDF(input_folder, pdfpath, pdfname, chap=1):
     '''
@@ -74,12 +73,22 @@ def downloadManga(manga):
         manga: 漫画id
         
     return: 
-        None
+        0: 下载成功
+        1: 漫画不存在
+        -1: 下载失败
     '''
     config = os.path.join(os.path.dirname(__file__), "../config.yml")
     loadConfig = jmcomic.JmOption.from_file(config)
     mangaCache(manga)
-    jmcomic.download_album(manga, loadConfig)
+    try:
+        jmcomic.download_album(manga, loadConfig)
+        return 0
+    except jmcomic.MissingAlbumPhotoException as e:
+        print(f'id={e.error_jmid}的本子不存在')
+        return 1
+    except jmcomic.JmcomicException as e:
+        print(f'jmcomic遇到异常: {e}')
+        return -1
 
 def convertPDF(manga):
     '''
@@ -123,9 +132,9 @@ def searchManga(id):
     return: 
         漫画标题
     '''
-    client = JmOption.default().new_jm_client()
+    client = jmcomic.JmOption.default().new_jm_client()
     page = client.search_site(search_query=id)
-    album: JmAlbumDetail = page.single_album
+    album: jmcomic.JmAlbumDetail = page.single_album
     return album.title
 
 
