@@ -19,7 +19,8 @@ def all2PDF(input_folder, pdfpath, pdfname, chap=1):
         chap: 章节数
     
     return: 
-        None
+        0: 转换成功
+        -1: 章节不存在
     '''
     start_time = time.time()
     path = input_folder
@@ -33,6 +34,9 @@ def all2PDF(input_folder, pdfpath, pdfname, chap=1):
                 subdir.append(int(entry.name))
     subdir.sort()
     subdir = [entry for entry in subdir if entry == int(chap)]
+    if subdir == []:
+        print(f"{chap}章不存在")
+        return -1
     for i in subdir:
         with os.scandir(path + "/" + str(i)) as entries:
             for entry in entries:
@@ -59,6 +63,7 @@ def all2PDF(input_folder, pdfpath, pdfname, chap=1):
     end_time = time.time()
     run_time = end_time - start_time
     print("运行时间：%3.2f 秒" % run_time)
+    return 0
 
 
 def downloadManga(manga):
