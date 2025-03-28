@@ -1,9 +1,14 @@
+import asyncio
+
+from flask import send_file
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *  # 导入事件类
 from pkg.platform.types import *
 from pkg.core.entities import LauncherTypes
+from plugins.JM_PDF_plugin.utils.callapi import *
 from plugins.JM_PDF_plugin.utils.image2pdf import *
-from plugins.JM_PDF_plugin.utils.sendfile import *
+from plugins.JM_PDF_plugin.utils.undofile import undo_file
+from plugins.JM_PDF_plugin.utils.sendfile import send_file
 import re
 import os
 
@@ -14,7 +19,7 @@ current_dir = os.path.dirname(__file__)
 class JMcomicPDFPlugin(BasePlugin):
     # 插件加载时触发
     def __init__(self, host: APIHost):
-        self.send_file = send_file(host="127.0.0.1", port=3000)
+        self.napcat = NapCatApi('127.0.0.1', 3000)
         config = os.path.join(os.path.dirname(__file__), "config.yml")
         with open(config, "r", encoding="utf8") as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
@@ -92,26 +97,23 @@ class JMcomicPDFPlugin(BasePlugin):
                     ]))
                     chap = "-1"
                 self.ap.logger.info(f"发送文件：{os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf"))}")
-                match ctx.event.query.launcher_type:
-                    case LauncherTypes.GROUP:
-                        message_data = {
-                            "group_id": str(ctx.event.launcher_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf")),
-                            "name": f"{manga_id}{chap}.pdf",
-                        }
-                    case LauncherTypes.PERSON:
-                        message_data = {
-                            "user_id": str(ctx.event.sender_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf")),
-                            "name": f"{manga_id}{chap}.pdf",
-                        }
-                await self.send_file.send(message_data, ctx.event.query.launcher_type)
+                await send_file(
+                    self.napcat, 
+                    ctx, 
+                    os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf")), 
+                    f"{manga_id}{chap}.pdf"
+                )
+                if ctx.event.query.launcher_type == LauncherTypes.GROUP:
+                    waittime = 10
+                    await ctx.reply(MessageChain([Plain(f"文件发送完成，{waittime}s后自动撤回")]))
+                    asyncio.create_task(undo_file(self.napcat, ctx, manga_id, chap, waittime))
             case "/jm [ID] [CHAPTER]":
                 manga_id = re.search(r"^/jm (\d+) (\d+)$", msg).group(1)
-                chap = int(re.search(r"^/jm (\d+) (\d+)$", msg).group(2))
+                chap = str(re.search(r"^/jm (\d+) (\d+)$", msg).group(2))
                 await ctx.reply(MessageChain([
                     Plain(f"正在将jm{manga_id}章节{chap}转换为PDF...\n可能需要10s至1min不等，请耐心等待")
                 ]))
+                chap = "-" + chap   # 拼接章节号
                 if not mangaCache(manga_id):
                     match downloadManga(manga_id):
                         case 0:
@@ -128,29 +130,25 @@ class JMcomicPDFPlugin(BasePlugin):
                                 Plain(f"发生未知错误")
                             ]))
                             return
-                match all2PDF(os.path.join(self.pdf_dir, manga_id), self.pdf_dir, f"{manga_id}-{chap}", chap):
+                match all2PDF(os.path.join(self.pdf_dir, manga_id), self.pdf_dir, f"{manga_id}{chap}", int(chap.replace('-', ''))):
                     case 0:
                         self.ap.logger.info(f"jm{manga_id}转换完成")
                     case -1:
-                        self.ap.logger.info(f"jm{manga_id}转换失败-章节{chap}不存在")
+                        self.ap.logger.info(f"jm{manga_id}转换失败-章节{chap.replace('-', '')}不存在")
                         await ctx.reply(MessageChain([
-                            Plain(f"jm{manga_id}转换失败-章节{chap}不存在")
+                            Plain(f"jm{manga_id}转换失败-章节{chap.replace('-', '')}不存在")
                         ]))
                         return
-                match ctx.event.query.launcher_type:
-                    case LauncherTypes.GROUP:
-                        message_data = {
-                            "group_id": str(ctx.event.launcher_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}-{chap}.pdf")),
-                            "name": f"{manga_id}-{chap}.pdf",
-                        }
-                    case LauncherTypes.PERSON:
-                        message_data = {
-                            "user_id": str(ctx.event.sender_id),
-                            "file": os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}-{chap}.pdf")),
-                            "name": f"{manga_id}-{chap}.pdf",
-                        }
-                await self.send_file.send(message_data, ctx.event.query.launcher_type)
+                await send_file(
+                    self.napcat, 
+                    ctx, 
+                    os.path.normpath(os.path.join(self.pdf_dir, f"{manga_id}{chap}.pdf")), 
+                    f"{manga_id}{chap}.pdf"
+                )
+                if ctx.event.query.launcher_type == LauncherTypes.GROUP:
+                    waittime = 20
+                    await ctx.reply(MessageChain([Plain(f"文件发送完成，{waittime}s后自动撤回")]))
+                    asyncio.create_task(undo_file(self.napcat, ctx, manga_id, chap, waittime))
             case _:
                 pass
         
